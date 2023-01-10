@@ -1,6 +1,7 @@
 //! Module containing region of interest definitions.
 
 /// Structure denoting a region of interest.
+#[derive(Debug, Clone)]
 pub struct ROI {
     /// Width of the region of interest.
     pub width: u16,
@@ -21,6 +22,7 @@ impl ROI {
 }
 
 /// Structure denoting the center of a region of interest.
+#[derive(Debug, Clone)]
 pub struct ROICenter {
     /// The SPAD used as center point.
     pub spad: u8,

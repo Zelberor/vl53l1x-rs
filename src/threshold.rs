@@ -1,6 +1,7 @@
 //! Module containing threshold definitions and implementations.
 
 /// Threshold window behavior.
+#[derive(Debug, Clone)]
 pub enum Window {
     /// Trigger when measurement is below threshold. The low threshold will be used as threshold.
     Below = 0,
@@ -25,6 +26,7 @@ impl From<u8> for Window {
 }
 
 /// Threshold sturcture defining a threshold.
+#[derive(Debug, Clone)]
 pub struct Threshold {
     /// The lower bound of the threshold window.
     pub low: u16,
