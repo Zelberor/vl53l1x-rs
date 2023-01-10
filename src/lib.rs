@@ -69,7 +69,7 @@
 //!
 //!     // Start a ranging operation, needed to retrieve a distance
 //!     vl.start_ranging().expect(ERR);
-//!     
+//!
 //!     // Wait until distance data is ready to be read.
 //!     while !vl.is_data_ready().expect(ERR) {}
 //!
@@ -85,6 +85,8 @@
 //! ```
 #![no_std]
 #![warn(missing_docs)]
+
+use core::num::Wrapping;
 
 use cfg_if::cfg_if;
 use comm::{Read, Write};
@@ -748,7 +750,8 @@ where
             &mut signal,
         )?;
 
-        Ok(u16::from_be_bytes(signal) * 8)
+        let signal_rate = Wrapping(u16::from_be_bytes(signal)) * Wrapping(8);
+        Ok(signal_rate.0)
     }
 
     /// Get the count of currently enabled SPADs.
@@ -769,7 +772,8 @@ where
 
         self.read_bytes(Register::RESULT__AMBIENT_COUNT_RATE_MCPS_SD0, &mut ambient)?;
 
-        Ok(u16::from_be_bytes(ambient) * 8)
+        let ambient_rate = Wrapping(u16::from_be_bytes(ambient)) * Wrapping(8);
+        Ok(ambient_rate.0)
     }
 
     /// Get the ranging status.
@@ -789,11 +793,13 @@ where
 
         self.read_bytes(Register::RESULT__RANGE_STATUS, &mut result)?;
 
+        let ambient_rate = Wrapping(u16::from_be_bytes([result[7], result[8]])) * Wrapping(8);
+        let sig_per_spad = Wrapping(u16::from_be_bytes([result[15], result[16]])) * Wrapping(8);
         Ok(MeasureResult {
             status: (result[0] & 0x1F).into(),
-            ambient: u16::from_be_bytes([result[7], result[8]]) * 8,
+            ambient: ambient_rate.0,
             spad_count: result[3] as u16,
-            sig_per_spad: u16::from_be_bytes([result[15], result[16]]) * 8,
+            sig_per_spad: sig_per_spad.0,
             distance_mm: u16::from_be_bytes([result[13], result[14]]),
         })
     }
